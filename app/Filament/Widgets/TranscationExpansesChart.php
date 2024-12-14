@@ -18,7 +18,7 @@ class TranscationExpansesChart extends ChartWidget
     {
         $startDate = ! is_null($this->filters['startDate'] ?? null) ?
             Carbon::parse($this->filters['startDate']) :
-            null;
+            \now();
 
         $endDate = ! is_null($this->filters['endDate'] ?? null) ?
             Carbon::parse($this->filters['endDate']) :
@@ -28,6 +28,7 @@ class TranscationExpansesChart extends ChartWidget
                 start: $startDate,
                 end: $endDate,
             )
+            ->dateColumn('date_transtion')
             ->perDay()
             ->sum('amount');
 

@@ -16,18 +16,25 @@ class TransactionIncomeChart extends ChartWidget
     protected static string $color = 'success';
     protected function getData(): array
     {
-        $startDate = ! is_null($this->filters['startDate'] ?? null) ?
-            Carbon::parse($this->filters['startDate']) :
-            null;
+        $startDate = isset($this->filters['startDate']) && $this->filters['startDate']
+            ? Carbon::parse($this->filters['startDate'])
+            : now(); // Gunakan hari ini sebagai default
 
-        $endDate = ! is_null($this->filters['endDate'] ?? null) ?
-            Carbon::parse($this->filters['endDate']) :
-            now();
+        $endDate = isset($this->filters['endDate']) && $this->filters['endDate']
+            ? Carbon::parse($this->filters['endDate'])
+            : now(); // Gunakan hari ini sebagai default
+
+        // Pastikan $startDate dan $endDate bukan null
+        if (is_null($startDate) || is_null($endDate)) {
+            throw new \Exception("Invalid date range: startDate or endDate is null");
+        }
+
         $data = Trend::query(Transactions::Income())
             ->between(
                 start: $startDate,
                 end: $endDate,
             )
+            ->dateColumn('date_transtion')
             ->perDay()
             ->sum('amount');
 
@@ -41,6 +48,7 @@ class TransactionIncomeChart extends ChartWidget
             'labels' => $data->map(fn(TrendValue $value) => $value->date),
         ];
     }
+
 
     protected function getType(): string
     {
